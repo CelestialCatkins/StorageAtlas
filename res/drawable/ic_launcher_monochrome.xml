@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 单色层：Android 13+ 主题图标。系统只读 alpha 并统一染色，
+     因此全实心、无线宽层次，主次全靠节点直径（13.4 / 9.8 / 7.9 / 6.7）。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="5.9"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M54,79.4 L54,49.8"/>
+
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.7"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M54,49.8 L54,29.6"/>
+
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.7"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M54,56.4 Q41.8,52.7 32.1,38.2"/>
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.7"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M54,56.4 Q66.2,52.7 75.9,38.2"/>
+
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,56.4 m-4.9,0 a4.9,4.9 0 1,0 9.8,0 a4.9,4.9 0 1,0 -9.8,0"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M32.1,38.2 m-3.96,0 a3.96,3.96 0 1,0 7.92,0 a3.96,3.96 0 1,0 -7.92,0"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M75.9,38.2 m-3.96,0 a3.96,3.96 0 1,0 7.92,0 a3.96,3.96 0 1,0 -7.92,0"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,29.6 m-3.35,0 a3.35,3.35 0 1,0 6.7,0 a3.35,3.35 0 1,0 -6.7,0"/>
+
+    <!-- 根节点：留一个小孔，小尺寸下仍分得清"根"与"梢" -->
+    <path android:fillColor="#FFFFFF" android:fillType="evenOdd"
+        android:pathData="M54,79.4 m-6.4,0 a6.4,6.4 0 1,0 12.8,0 a6.4,6.4 0 1,0 -12.8,0 Z M54,79.4 m-2.25,0 a2.25,2.25 0 1,0 4.5,0 a2.25,2.25 0 1,0 -4.5,0 Z"/>
+</vector>
