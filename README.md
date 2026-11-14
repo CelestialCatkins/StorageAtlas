@@ -1,3 +1,5 @@
+**简体中文** · [English](./README.en.md)
+
 <div align="center">
 <img src="docs/images/icon.png" width="128" alt="存储星图">
 <h1>存储星图 · StorageAtlas</h1>
