@@ -22,6 +22,8 @@ public class FsNode {
     public int level = -1;
     public String note;
     public boolean lastChild;
+    /** 可视层级引导线：第 k 位为 true 表示第 k 层祖先还有后续兄弟，需画通高竖线。长度 = 该行的可视层级。 */
+    public boolean[] rails;
 
     public FsNode(File f, int depth) {
         this.file = f;

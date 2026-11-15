@@ -55,6 +55,13 @@ public final class Ui {
         return rd;
     }
 
+    /** 带底色的水波：内容是一层圆角填充，按压反馈叠在它上面。 */
+    public static android.graphics.drawable.RippleDrawable rippleOn(Context c, int color, int fill, float radiusDp) {
+        GradientDrawable content = round(fill, radiusDp, c);
+        return new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(color), content, null);
+    }
+
     public static GradientDrawable round(int fill, float radiusDp, Context c) {
         GradientDrawable d = new GradientDrawable();
         d.setColor(fill);
@@ -138,6 +145,17 @@ public final class Ui {
                 c.drawCircle(12, 12, 1.7f, p);
                 c.drawCircle(12, 18.5f, 1.7f, p);
                 break;
+            case "refresh": {
+                // 顺时针圆环箭头：顶部矩形底座的实心箭头 + 右侧留口
+                c.drawArc(new RectF(5.7f, 5.7f, 18.3f, 18.3f), 335f, 295f, false, p);
+                p.setStyle(Paint.Style.FILL);
+                path.moveTo(12f, 3.4f);
+                path.lineTo(12f, 8f);
+                path.lineTo(15.6f, 5.7f);
+                path.close();
+                c.drawPath(path, p);
+                break;
+            }
             case "close":
                 path.moveTo(6, 6); path.lineTo(18, 18);
                 path.moveTo(18, 6); path.lineTo(6, 18);

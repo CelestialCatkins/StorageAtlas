@@ -7,7 +7,7 @@
 <p>
 <img alt="license" src="https://img.shields.io/badge/license-MIT-4c7a6f">
 <img alt="android" src="https://img.shields.io/badge/Android-8.0%2B-3ddc84">
-<img alt="apk" src="https://img.shields.io/badge/APK-85%20KB-6b7280">
+<img alt="apk" src="https://img.shields.io/badge/APK-89%20KB-6b7280">
 </p>
 </div>
 
@@ -15,7 +15,7 @@
 再通过 App 内自带的 MCP 服务把这些信息交给 AI：读目录、读文件内容、批量写备注、改重要度，
 全部在手机本地完成，数据不出设备。
 
-- 纯 Java，没有任何第三方依赖，APK 只有 85 KB
+- 纯 Java，没有任何第三方依赖，APK 只有 89 KB
 - 不用 Gradle：`./build.sh` 一条命令十几秒出包
 - 界面全部自绘，没有 AppCompat / Material 组件库
 
@@ -92,7 +92,7 @@ curl -s http://127.0.0.1:8765/mcp \
 从 [Releases](https://github.com/CelestialCatkins/StorageAtlas/releases) 下载 APK 直接安装，或者：
 
 ```bash
-adb install -r storage-atlas-1.2.apk
+adb install -r storage-atlas-1.6.1.apk
 ```
 
 首次打开需要在系统设置里授予「所有文件访问权限」（`MANAGE_EXTERNAL_STORAGE`），
@@ -119,7 +119,7 @@ cd StorageAtlas
 | `ATLAS_BUILD_TOOLS` | SDK 里版本最高的一支 | build-tools 目录 |
 | `ATLAS_PLATFORM` | `36` | platforms 下要用的 API 版本 |
 | `ATLAS_HOST_TOOLS` | `/root/arm64-tools/build-tools` | 主机原生 `aapt2` / `zipalign`，ARM64 上需要 |
-| `VERSION_CODE` / `VERSION_NAME` | `3` / `1.2` | 版本号 |
+| `VERSION_CODE` / `VERSION_NAME` | `8` / `1.6.1` | 版本号 |
 | `ATLAS_KEYSTORE` / `ATLAS_KS_PASS` | `keystore.jks` / `storageatlas` | 签名库；不存在时自动生成 |
 
 x86_64 电脑上一般不用设 `ATLAS_HOST_TOOLS`。ARM64 主机（比如手机上的 Ubuntu）里 SDK 自带的
@@ -153,7 +153,7 @@ tools/                  词典生成、图标预览脚本
 
 - **不用 Gradle**：只有一个 module、零依赖，Gradle 的配置和下载比构建本身还慢。
   `aapt2 + javac + d8 + zipalign + apksigner` 串起来十几秒出包。
-- **不用 AppCompat / Material**：界面基本都是自绘，引组件库只会让 85 KB 变成几 MB。
+- **不用 AppCompat / Material**：界面基本都是自绘，引组件库只会让 89 KB 变成几 MB。
 - **备注按路径存**：SharedPreferences 里存「存储相对路径 → 备注」。文件改名不丢，覆盖同名文件也不会错标。
 - **MCP 做在 App 里**：数据本来就在手机上，不必再经电脑中转；AI 连的是本机回环地址。
 
@@ -173,6 +173,11 @@ tools/                  词典生成、图标预览脚本
 
 ## 版本
 
+- **1.6.1**：刷新图标改为标准的圆环箭头，与系统图标一致
+- **1.6**：当前目录刷新按钮/菜单，刷新后重读目录与体积，保留展开分支和滚动位置
+- **1.5**：深层嵌套自适应缩进（20/12/10dp）、12 层内不再刷「第 N 层」、单链中间层不再整列铺绿，超深目录三点兜底
+- **1.4**：角标整合重要度、父子字重/字色分级、极淡虚线树形与 20dp 缩进、右侧标签横排弱化
+- **1.3**：原地展开后的层级引导线、子项缩进与分组底色，空目录提示
 - **1.2**：目录翻页与排序、批量读文件 `read_files`、全盘未备注统计与 5 分钟缓存、
   批量改重要度、`set_notes` 返回更细的结果并检查备注合规
 - **1.1**：MCP 服务、搜索、收藏、重要度

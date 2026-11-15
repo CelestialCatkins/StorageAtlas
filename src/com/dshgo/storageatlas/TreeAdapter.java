@@ -16,6 +16,8 @@ import java.util.Locale;
 public class TreeAdapter extends BaseAdapter {
 
     public interface SizeListener { void onNeedSize(FsNode n); }
+    /** 原地展开/收起后回调，供界面做提示与滚动定位。 */
+    public interface ToggleListener { void onToggle(FsNode n, boolean expanded); }
 
     private final Context c;
     private final List<FsNode> visible = new ArrayList<>();
@@ -23,7 +25,9 @@ public class TreeAdapter extends BaseAdapter {
     public final FsNode fsRoot;
     public int filterLevel = -1;
     public SizeListener sizeListener;
+    public ToggleListener toggleListener;
     public Runnable onChanged;
+    private static final boolean[] EMPTY_RAILS = new boolean[0];
 
     public TreeAdapter(Context c, FsNode root) {
         this.c = c;
@@ -41,19 +45,26 @@ public class TreeAdapter extends BaseAdapter {
         visible.clear();
         if (dirRoot != null) {
             dirRoot.load(Atlas.get(c));
-            addChildren(dirRoot);
+            addChildren(dirRoot, null);
         }
         notifyDataSetChanged();
     }
 
-    private void addChildren(FsNode parent) {
+    private void addChildren(FsNode parent, boolean[] parentRails) {
         if (parent.children == null) return;
         Atlas atlas = Atlas.get(c);
+        // 先按完整兄弟表打底，筛选隐藏但仍展开的节点也有确定的 lastChild，避免残留旧值
+        for (int i = 0; i < parent.children.size(); i++) {
+            parent.children.get(i).lastChild = (i == parent.children.size() - 1);
+        }
         ArrayList<FsNode> shown = new ArrayList<>();
         for (FsNode n : parent.children) {
             if (n.level < 0) n.level = atlas.levelFor(n.file);
             if (filterLevel >= 0 && n.level != filterLevel) {
-                if (n.dir && n.expanded) addChildren(n);
+                if (n.dir && n.expanded) {
+                    n.rails = railsFor(parentRails, n.lastChild);
+                    addChildren(n, n.rails);
+                }
                 continue;
             }
             shown.add(n);
@@ -62,9 +73,19 @@ public class TreeAdapter extends BaseAdapter {
         for (int i = 0; i < shown.size(); i++) {
             FsNode n = shown.get(i);
             n.lastChild = (i == shown.size() - 1);
+            n.rails = railsFor(parentRails, n.lastChild);
             visible.add(n);
-            if (n.dir && n.expanded) addChildren(n);
+            if (n.dir && n.expanded) addChildren(n, n.rails);
         }
+    }
+
+    /** 顶层（dirRoot 的直接子项）没有引导线；其余每层继承父级并追加"本行是否还有兄弟"。 */
+    private static boolean[] railsFor(boolean[] parentRails, boolean lastChild) {
+        if (parentRails == null) return EMPTY_RAILS;
+        boolean[] rails = new boolean[parentRails.length + 1];
+        System.arraycopy(parentRails, 0, rails, 0, parentRails.length);
+        rails[rails.length - 1] = !lastChild;
+        return rails;
     }
 
     /** 显示名：按设置决定备注还是原名当主标题，排序也用它。 */
@@ -132,6 +153,7 @@ public class TreeAdapter extends BaseAdapter {
         n.expanded = !n.expanded;
         rebuild();
         if (onChanged != null) onChanged.run();
+        if (toggleListener != null) toggleListener.onToggle(n, n.expanded);
     }
 
     public void collapse(FsNode n) {
@@ -179,7 +201,8 @@ public class TreeAdapter extends BaseAdapter {
         if (row == null) row = new RowView(c);
         FsNode n = visible.get(position);
         if (n.level < 0) n.level = Atlas.get(c).levelFor(n.file);
-        row.bind(n, false, relDepth(n));
+        int depth = n.rails != null ? n.rails.length : relDepth(n);
+        row.bind(n, false, depth, true);
         row.setExpandListener(this::toggle);
         if (n.dir && n.size < 0 && !n.sizeQueued && Atlas.get(c).scanSizes && sizeListener != null) {
             n.sizeQueued = true;

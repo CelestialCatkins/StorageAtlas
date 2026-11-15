@@ -325,7 +325,7 @@ public class McpServer {
                 result.put("capabilities", caps);
                 JSONObject info = new JSONObject();
                 info.put("name", "storage-atlas");
-                info.put("version", "1.2");
+                info.put("version", "1.6.1");
                 result.put("serverInfo", info);
                 result.put("instructions", GUIDE);
             } catch (Exception ignored) { }

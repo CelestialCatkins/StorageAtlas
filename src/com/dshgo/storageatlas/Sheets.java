@@ -919,6 +919,10 @@ public final class Sheets {
         LinearLayout box = sheetRoot(a);
         box.addView(title(a, "设置与工具"));
 
+        box.addView(actionRow(a, "refresh", "刷新", "重新读取当前目录", p.text, () -> {
+            dismissFrom(a);
+            a.refresh();
+        }));
         box.addView(actionRow(a, "info", "重要度图例", "六档说明", p.text,
                 () -> {
                     legend(a);
@@ -966,7 +970,12 @@ public final class Sheets {
                     dismissFrom(a);
                 }));
         box.addView(Ui.hairline(a, p.hair));
-        box.addView(actionRow(a, "info", "关于存储星图", "v1.2", p.text, () -> {
+        String ver = "v1.6.1";
+        try {
+            ver = "v" + a.getPackageManager().getPackageInfo(a.getPackageName(), 0).versionName;
+        } catch (Exception ignored) {
+        }
+        box.addView(actionRow(a, "info", "关于存储星图", ver, p.text, () -> {
             about(a);
             dismissFrom(a);
         }));
@@ -1084,6 +1093,11 @@ public final class Sheets {
         Palette p = Palette.get(a);
         LinearLayout box = sheetRoot(a);
         box.addView(title(a, "关于存储星图"));
+        String ver = "1.6.1";
+        try {
+            ver = a.getPackageManager().getPackageInfo(a.getPackageName(), 0).versionName;
+        } catch (Exception ignored) {
+        }
         TextView body = Ui.label(a,
                 "把手机存储画成一张可以读懂的星图：每个文件夹按重要度着色，中文备注优先显示，"
                         + "长条目告诉你它是什么、能不能删。\n\n"
@@ -1091,9 +1105,9 @@ public final class Sheets {
                         + "· 自定义备注 " + a.atlas.customNoteCount() + " 条\n"
                         + "· 所有数据只在本机读取，不上传、不修改文件\n"
                         + "· 删除操作需要勾选确认，且不可恢复\n"
-                        + "· 1.1 新增：AI 助手（MCP）与文件阅读\n"
-                        + "· 1.2 新增：目录翻页、批量读文件、未备注统计、批量重要度\n\n"
-                        + "版本 1.2 · 数据只留在这台手机",
+                        + "· 1.5 新增：深层目录自适应缩进与树形引导线\n"
+                        + "· 1.6 新增：当前目录刷新\n\n"
+                        + "版本 " + ver + " · 数据只留在这台手机",
                 12.5f, p.text2, Ui.SANS);
         body.setLineSpacing(Ui.dp(a, 4), 1f);
         body.setPadding(Ui.dp(a, 20), 0, Ui.dp(a, 20), Ui.dp(a, 16));

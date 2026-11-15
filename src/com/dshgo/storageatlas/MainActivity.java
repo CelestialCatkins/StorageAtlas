@@ -55,6 +55,8 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
     CompositionBar compBar;
     FrameLayout listWrap;
     ListView list;
+    View refreshBtn;
+    boolean refreshing;
     LinearLayout emptyState;
     TextView emptyTitle, emptyDesc, emptyAction;
     TextView snack;
@@ -123,6 +125,10 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
         top.addView(iconBtn("search", new Runnable() {
             @Override public void run() { openSearch(); }
         }));
+        refreshBtn = iconBtn("refresh", new Runnable() {
+            @Override public void run() { refresh(); }
+        });
+        top.addView(refreshBtn);
         top.addView(iconBtn("more", new Runnable() {
             @Override public void run() { Sheets.menu(MainActivity.this); }
         }));
@@ -186,8 +192,9 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
         listWrap.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         list = new ListView(this);
-        list.setDivider(new android.graphics.drawable.ColorDrawable(p.hair));
-        list.setDividerHeight(Ui.dp(this, 0.6f));
+        // 分隔线由 RowView 自绘：子行从内容起点开始，引导线不会被列表分隔线切断
+        list.setDivider(null);
+        list.setDividerHeight(0);
         list.setVerticalScrollBarEnabled(false);
         list.setClipToPadding(false);
         list.setPadding(0, 0, 0, Ui.dp(this, 72));
@@ -273,6 +280,7 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
         switch (id) {
             case "back": return "返回上一级";
             case "search": return "搜索文件或文件夹";
+            case "refresh": return "刷新当前目录";
             case "more": return "更多功能";
             default: return id;
         }
@@ -290,6 +298,7 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
         adapter.sizeListener = this;
         if (atlas.mcpEnabled && McpService.server() == null) McpService.start(this);
         adapter.onChanged = this::refreshAll;
+        adapter.toggleListener = this::onTreeToggle;
         list.setAdapter(adapter);
         refreshAll();
     }
@@ -335,6 +344,111 @@ public class MainActivity extends Activity implements TreeAdapter.SizeListener {
                 emptyAction.setVisibility(View.GONE);
             }
         }
+    }
+
+    /** 原地展开后：空目录给提示；父行在屏幕下半部时上移，保证子项可见。 */
+    private void onTreeToggle(FsNode n, boolean expanded) {
+        if (!expanded) return;
+        if (n.childCount() == 0) {
+            snack("这个文件夹是空的");
+            return;
+        }
+        final int idx = adapter.indexOf(n);
+        if (idx < 0) return;
+        list.post(new Runnable() {
+            @Override public void run() {
+                int first = list.getFirstVisiblePosition();
+                View v = list.getChildAt(idx - first);
+                if (v != null && v.getTop() > list.getHeight() * 0.55f) {
+                    list.smoothScrollToPositionFromTop(idx, Ui.dp(MainActivity.this, 8), 220);
+                }
+            }
+        });
+    }
+
+    /** 重新读取当前目录及其已展开分支；保留展开态与滚动位置。 */
+    void refresh() {
+        if (adapter == null || refreshing) return;
+        final FsNode focus = adapter.dirRoot;
+        if (focus == null) return;
+        if (!focus.file.exists()) {
+            goRoot();
+            snack("当前目录已不存在，已返回根目录");
+            return;
+        }
+        refreshing = true;
+        if (refreshBtn != null) refreshBtn.animate().rotationBy(360f).setDuration(420).start();
+        try {
+            Set<String> expanded = new HashSet<>();
+            collectExpanded(focus, expanded);
+            int first = list.getFirstVisiblePosition();
+            View firstView = list.getChildAt(0);
+            int top = firstView == null ? 0 : Math.max(0, firstView.getTop());
+
+            sizeInFlight.clear();
+            atlas.dropCache(focus.path);
+            invalidateTree(focus);
+            adapter.rebuild();
+            for (String path : expanded) {
+                FsNode n = nodeAt(path);
+                if (n != null && n.dir) {
+                    n.expanded = true;
+                    n.load(atlas);
+                }
+            }
+            adapter.rebuild();
+
+            focus.size = -1;
+            focus.sizeQueued = false;
+            if (atlas.scanSizes && focus != root) {
+                focus.sizeQueued = true;
+                onNeedSize(focus);
+            }
+            refreshAll();
+            list.setSelectionFromTop(first, top);
+            snack("已刷新");
+        } catch (Exception e) {
+            snack("刷新失败：可能没有权限或路径已变化");
+        } finally {
+            refreshing = false;
+        }
+    }
+
+    private void collectExpanded(FsNode n, Set<String> out) {
+        if (n.children == null) return;
+        for (FsNode k : n.children) {
+            if (k.dir && k.expanded) out.add(k.path);
+            collectExpanded(k, out);
+        }
+    }
+
+    /** 清掉子树里的目录列表与备注/等级/体积缓存，让下一次重建真正读盘。 */
+    private void invalidateTree(FsNode n) {
+        if (n.children != null) for (FsNode k : n.children) invalidateTree(k);
+        n.children = null;
+        n.size = -1;
+        n.sizeQueued = false;
+        n.level = -1;
+        n.note = null;
+    }
+
+    /** 按绝对路径在当前树里找节点，逐级 load，不依赖刷新前的旧对象。 */
+    private FsNode nodeAt(String path) {
+        String rel = Atlas.rel(path);
+        FsNode cur = adapter.fsRoot;
+        if (rel.isEmpty()) return cur;
+        for (String part : rel.split("/")) {
+            cur.load(atlas);
+            FsNode next = null;
+            if (cur.children != null) {
+                for (FsNode k : cur.children) {
+                    if (k.name.equals(part)) { next = k; break; }
+                }
+            }
+            if (next == null) return null;
+            cur = next;
+        }
+        return cur;
     }
 
     /** AI 通过 MCP 改了备注/等级后，把界面刷一遍。 */

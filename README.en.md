@@ -7,13 +7,13 @@
 <p>
 <img alt="license" src="https://img.shields.io/badge/license-MIT-4c7a6f">
 <img alt="android" src="https://img.shields.io/badge/Android-8.0%2B-3ddc84">
-<img alt="apk" src="https://img.shields.io/badge/APK-85%20KB-6b7280">
+<img alt="apk" src="https://img.shields.io/badge/APK-89%20KB-6b7280">
 </p>
 </div>
 
 Storage Atlas (存储星图) is a local storage browser for Android. It gives every directory and file a short Chinese note and an importance level, then hands that information to AI through the built-in MCP server: list directories, read file contents, write notes in bulk, change importance levels. Everything runs on the phone; no data leaves the device.
 
-- Pure Java, no third-party dependencies, an 85 KB APK
+- Pure Java, no third-party dependencies, an 89 KB APK
 - No Gradle: `./build.sh` produces the package in about a dozen seconds
 - The entire UI is custom-drawn, with no AppCompat / Material component libraries
 
@@ -88,7 +88,7 @@ See [docs/MCP.md](docs/MCP.md) for the full parameter reference.
 Download the APK from [Releases](https://github.com/CelestialCatkins/StorageAtlas/releases) and install it directly, or:
 
 ```bash
-adb install -r storage-atlas-1.2.apk
+adb install -r storage-atlas-1.6.1.apk
 ```
 
 On first launch you need to grant "All files access" (`MANAGE_EXTERNAL_STORAGE`) in system settings; otherwise only a limited set of directories is visible. Requires Android 8.0 (API 26) or later.
@@ -114,7 +114,7 @@ cd StorageAtlas
 | `ATLAS_BUILD_TOOLS` | the highest version in the SDK | build-tools directory |
 | `ATLAS_PLATFORM` | `36` | API version to use under platforms |
 | `ATLAS_HOST_TOOLS` | `/root/arm64-tools/build-tools` | Host-native `aapt2` / `zipalign`, needed on ARM64 |
-| `VERSION_CODE` / `VERSION_NAME` | `3` / `1.2` | Version numbers |
+| `VERSION_CODE` / `VERSION_NAME` | `8` / `1.6.1` | Version numbers |
 | `ATLAS_KEYSTORE` / `ATLAS_KS_PASS` | `keystore.jks` / `storageatlas` | Signing keystore; generated automatically if missing |
 
 On an x86_64 machine you usually don't need to set `ATLAS_HOST_TOOLS`. On an ARM64 host (Ubuntu on a phone, for example) the SDK's bundled `aapt2` is an x86_64 binary and won't run, so it has to be overridden with an ARM64 build — that is what this variable is for.
@@ -146,7 +146,7 @@ tools/                  Dictionary generation and icon preview scripts
 
 - **No Gradle**: one module, zero dependencies; Gradle's configuration and downloads take longer than the build itself.
   `aapt2 + javac + d8 + zipalign + apksigner` chained together produce the package in about a dozen seconds.
-- **No AppCompat / Material**: the UI is almost entirely custom-drawn; adding a component library would turn 85 KB into several MB.
+- **No AppCompat / Material**: the UI is almost entirely custom-drawn; adding a component library would turn 89 KB into several MB.
 - **Notes stored by path**: SharedPreferences holds "storage-relative path → note". Renaming a file doesn't lose its note, and overwriting a file with the same name doesn't mislabel it.
 - **MCP lives in the app**: the data is already on the phone, so there is no need to relay it through a computer; the AI connects to the loopback address.
 
@@ -166,6 +166,11 @@ tools/                  Dictionary generation and icon preview scripts
 
 ## Versions
 
+- **1.6.1**: standard circular-arrow refresh icon, consistent with system icons
+- **1.6**: refresh button/menu entry for the current directory; re-reads entries and sizes while preserving expanded branches and scroll position
+- **1.5**: adaptive indentation for deep nesting (20/12/10dp), no repeated layer captions within 12 levels, no all-green single-child chains, and a compact overflow marker beyond 12 levels
+- **1.4**: importance badges on icons, parent/child type hierarchy, faint dashed tree guides with 20dp indentation, and horizontally aligned muted level labels
+- **1.3**: tree guide lines, child indentation and grouped backgrounds for inline expansion, plus an empty-folder hint
 - **1.2**: directory paging and sorting, bulk file reads with `read_files`, whole-storage unannotated stats with a 5-minute cache,
   bulk importance changes, and `set_notes` returning finer-grained results plus a note-compliance check
 - **1.1**: MCP server, search, favorites, importance levels

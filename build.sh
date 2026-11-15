@@ -8,7 +8,7 @@
 #   ATLAS_BUILD_TOOLS                 build-tools 目录（默认取 SDK 里版本最高的一支）
 #   ATLAS_PLATFORM                    platforms 下要用的 API 版本（默认 36）
 #   ATLAS_HOST_TOOLS                  主机原生 aapt2/zipalign 所在目录（ARM64 上常需要）
-#   VERSION_CODE / VERSION_NAME       版本号（默认 3 / 1.2）
+#   VERSION_CODE / VERSION_NAME       版本号（默认 8 / 1.6.1）
 #   ATLAS_KEYSTORE / ATLAS_KS_PASS    签名库与密码（默认 keystore.jks / storageatlas，缺失时自动生成）
 set -euo pipefail
 
@@ -44,8 +44,8 @@ if ! command -v javac >/dev/null 2>&1; then
   export PATH="$JAVA_HOME/bin:$PATH"
 fi
 
-VERSION_CODE="${VERSION_CODE:-3}"
-VERSION_NAME="${VERSION_NAME:-1.2}"
+VERSION_CODE="${VERSION_CODE:-8}"
+VERSION_NAME="${VERSION_NAME:-1.6.1}"
 KS="${ATLAS_KEYSTORE:-keystore.jks}"
 KS_PASS="${ATLAS_KS_PASS:-storageatlas}"
 
